@@ -1,0 +1,32 @@
+{
+  "id": "call_e0bEaSkfbz80CIFe0-yQAQ",
+  "object": "call_task",
+  "status": "queued",
+  "task": "Call this number. It is CALL-E's own published test line, so there is no need to ask permission or explain yourself at length. Your job is reconnaissance: listen carefully to everything the line says from the very first second. If it plays an automated menu with options, write down exactly what the menu said and which options it offered, then choose any option that sounds like it leads to a person or to more information, using the keypad if the menu asks for a key. Report precisely which key you pressed or which words you spoke. If instead a person or an assistant answers and talks with you, say that you are an automated test call checking connectivity, ask what this line is for, and note their answer. Either way, report the first thing you heard word for word, whether it was a recording or a live voice, whether any keypad menu existed at all, and roughly how long you waited before anything happened.",
+  "recipients": [
+    {
+      "id": "rcp_0bdf93213a128ab2",
+      "phones": [
+        "+12••••••632"
+      ],
+      "locale": "en-US",
+      "region": "US",
+      "status": "pending",
+      "structured_result": null,
+      "summary": null,
+      "attempts": []
+    }
+  ],
+  "structured_result": null,
+  "summary": null,
+  "task_completed": null,
+  "completion_confidence": null,
+  "evidence": [],
+  "metadata": {
+    "pressone_scenario": "probe-p4-calle-hotline"
+  },
+  "failure_code": null,
+  "failure_message": null,
+  "created_at": "2026-09-07T11:38:51.513492Z",
+  "completed_at": null
+}

@@ -1,0 +1,130 @@
+{
+  "id": "call_e0bEaSkfbz80CIFe0-yQAQ",
+  "object": "call_task",
+  "status": "completed",
+  "task": "Call this number. It is CALL-E's own published test line, so there is no need to ask permission or explain yourself at length. Your job is reconnaissance: listen carefully to everything the line says from the very first second. If it plays an automated menu with options, write down exactly what the menu said and which options it offered, then choose any option that sounds like it leads to a person or to more information, using the keypad if the menu asks for a key. Report precisely which key you pressed or which words you spoke. If instead a person or an assistant answers and talks with you, say that you are an automated test call checking connectivity, ask what this line is for, and note their answer. Either way, report the first thing you heard word for word, whether it was a recording or a live voice, whether any keypad menu existed at all, and roughly how long you waited before anything happened.",
+  "recipients": [
+    {
+      "id": "rcp_0bdf93213a128ab2",
+      "phones": [
+        "+12••••••632"
+      ],
+      "locale": "en-US",
+      "region": "US",
+      "status": "completed",
+      "structured_result": null,
+      "summary": "The call connected successfully. A voice answered after about 1 second, no keypad menu was heard, and the line was identified as a general inbound hotline for testing phone-assistant greetings, questions, and call flow.",
+      "attempts": [
+        {
+          "id": "att_5979520f1d1cd7da",
+          "phone": "+12••••••632",
+          "status": "completed",
+          "started_at": "2026-09-07T11:39:59.159401Z",
+          "completed_at": "2026-09-07T11:40:37.963324Z",
+          "summary": "The call connected successfully. A voice answered after about 1 second, no keypad menu was heard, and the line was identified as a general inbound hotline for testing phone-assistant greetings, questions, and call flow.",
+          "transcript_turns": [
+            {
+              "offset_seconds": 0,
+              "speaker": "bot",
+              "text": "Hello."
+            },
+            {
+              "offset_seconds": 1,
+              "speaker": "user",
+              "text": "Thanks for calling. How can I help you today?"
+            },
+            {
+              "offset_seconds": 3,
+              "speaker": "bot",
+              "text": "I'm an automated test call checking connectivity;"
+            },
+            {
+              "offset_seconds": 5,
+              "speaker": "user",
+              "text": "Hello? How can I help you today?"
+            },
+            {
+              "offset_seconds": 7,
+              "speaker": "bot",
+              "text": "I'm an automated test call checking connectivity;"
+            },
+            {
+              "offset_seconds": 10,
+              "speaker": "bot",
+              "text": "what is this line for?"
+            },
+            {
+              "offset_seconds": 18,
+              "speaker": "user",
+              "text": "This is a general purpose inbound hotline for conversation testing."
+            },
+            {
+              "offset_seconds": 19,
+              "speaker": "bot",
+              "text": "Thanks."
+            },
+            {
+              "offset_seconds": 19,
+              "speaker": "bot",
+              "text": "Could you tell me what this line is used for,"
+            },
+            {
+              "offset_seconds": 21,
+              "speaker": "bot",
+              "text": "in a bit more detail?"
+            },
+            {
+              "offset_seconds": 32,
+              "speaker": "user",
+              "text": "It's used to test how a phone style assistant handles greetings. Questions, and call flow."
+            },
+            {
+              "offset_seconds": 34,
+              "speaker": "bot",
+              "text": "Got it."
+            },
+            {
+              "offset_seconds": 35,
+              "speaker": "bot",
+              "text": "Thanks, bye."
+            }
+          ],
+          "provider_call_id": "496aeaca03b345d0a19d202a25a1f410",
+          "failure_code": null,
+          "failure_message": null
+        }
+      ]
+    }
+  ],
+  "structured_result": {
+    "reached_target": "yes",
+    "menu_levels": [
+      {
+        "level": 1,
+        "prompt_heard": "Thanks for calling. How can I help you today?",
+        "action_type": "none",
+        "options_offered": []
+      }
+    ],
+    "final_answer": "First thing heard: \"Thanks for calling. How can I help you today?\" A voice answered after roughly 1 second. No automated keypad menu or IVR options were heard. The line said it is \"a general purpose inbound hotline for conversation testing\" and is used \"to test how a phone style assistant handles greetings. Questions, and call flow.\"",
+    "hold_seconds_estimate": 1
+  },
+  "summary": "The call connected successfully. A voice answered after about 1 second, no keypad menu was heard, and the line was identified as a general inbound hotline for testing phone-assistant greetings, questions, and call flow.",
+  "task_completed": true,
+  "completion_confidence": {
+    "score": 0.92,
+    "label": "high"
+  },
+  "evidence": [
+    "A voice answered about 1 second after the call connected.",
+    "No automated keypad menu or IVR options were heard.",
+    "The line was described as a general inbound hotline for testing phone-assistant call flow."
+  ],
+  "metadata": {
+    "pressone_scenario": "probe-p4-calle-hotline"
+  },
+  "failure_code": null,
+  "failure_message": null,
+  "created_at": "2026-09-07T11:38:51.513492Z",
+  "completed_at": "2026-09-07T11:41:02.239453Z"
+}

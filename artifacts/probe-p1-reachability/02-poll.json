@@ -1,0 +1,54 @@
+{
+  "id": "call_L3mVPhPDYIDnPyqrsDmEPQ",
+  "object": "call_task",
+  "status": "failed",
+  "task": "Call the recipient. Say clearly that you are an automated assistant calling as a connectivity test for a developer project, that no action is needed, and ask them to say the word \"green\" if they can hear you clearly. Then thank them and end the call. Keep it under thirty seconds.",
+  "recipients": [
+    {
+      "id": "rcp_389d70a9f2f3a900",
+      "phones": [
+        "+91•••••••425"
+      ],
+      "locale": "en-IN",
+      "region": "IN",
+      "status": "failed",
+      "structured_result": null,
+      "summary": "The first call did not connect or complete; you can confirm retrying in about 45 minutes, provide a different retry time, or ask to retry immediately.",
+      "attempts": [
+        {
+          "id": "att_cb1bf8d5700f8094",
+          "phone": "+91•••••••425",
+          "status": "failed",
+          "started_at": "2026-09-05T11:51:35",
+          "completed_at": "2026-09-05T11:51:35",
+          "summary": "The first call did not connect or complete; you can confirm retrying in about 45 minutes, provide a different retry time, or ask to retry immediately.",
+          "transcript_turns": [],
+          "provider_call_id": "948149fb93604ce290f7e07e7c0c261d",
+          "failure_code": "603",
+          "failure_message": null
+        }
+      ]
+    }
+  ],
+  "structured_result": {
+    "heard_clearly": "unknown"
+  },
+  "summary": "The first call did not connect or complete; you can confirm retrying in about 45 minutes, provide a different retry time, or ask to retry immediately.",
+  "task_completed": false,
+  "completion_confidence": {
+    "score": 0.55,
+    "label": "medium"
+  },
+  "evidence": [
+    "The call ended immediately without any connected conversation.",
+    "No speech or transcript was captured.",
+    "The codeword confirmation was not obtained."
+  ],
+  "metadata": {
+    "pressone_scenario": "probe-p1-reachability"
+  },
+  "failure_code": "call_failed",
+  "failure_message": "calling task status=DECLINED (Hangup by: user)",
+  "created_at": "2026-09-05T15:50:56.314443Z",
+  "completed_at": "2026-09-05T15:51:59.238390Z"
+}

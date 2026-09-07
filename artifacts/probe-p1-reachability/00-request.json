@@ -1,0 +1,35 @@
+{
+  "task": "Call the recipient. Say clearly that you are an automated assistant calling as a connectivity test for a developer project, that no action is needed, and ask them to say the word \"green\" if they can hear you clearly. Then thank them and end the call. Keep it under thirty seconds.",
+  "recipients": [
+    {
+      "phones": [
+        "+91•••••••425"
+      ],
+      "region": "IN",
+      "locale": "en-IN"
+    }
+  ],
+  "result_schema": {
+    "type": "object",
+    "required": [
+      "heard_clearly"
+    ],
+    "properties": {
+      "heard_clearly": {
+        "type": "string",
+        "enum": [
+          "yes",
+          "no",
+          "unknown"
+        ]
+      },
+      "codeword_spoken": {
+        "type": "string"
+      }
+    }
+  },
+  "metadata": {
+    "pressone_scenario": "probe-p1-reachability"
+  },
+  "idempotency_key": "pressone-p1-2026-09-05T15"
+}

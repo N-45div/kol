@@ -1,0 +1,79 @@
+{
+  "task": "Call this number. It is CALL-E's own published test line, so there is no need to ask permission or explain yourself at length. Your job is reconnaissance: listen carefully to everything the line says from the very first second. If it plays an automated menu with options, write down exactly what the menu said and which options it offered, then choose any option that sounds like it leads to a person or to more information, using the keypad if the menu asks for a key. Report precisely which key you pressed or which words you spoke. If instead a person or an assistant answers and talks with you, say that you are an automated test call checking connectivity, ask what this line is for, and note their answer. Either way, report the first thing you heard word for word, whether it was a recording or a live voice, whether any keypad menu existed at all, and roughly how long you waited before anything happened.",
+  "recipients": [
+    {
+      "phones": [
+        "+12••••••632"
+      ],
+      "region": "US",
+      "locale": "en-US"
+    }
+  ],
+  "result_schema": {
+    "type": "object",
+    "required": [
+      "reached_target",
+      "menu_levels"
+    ],
+    "properties": {
+      "reached_target": {
+        "type": "string",
+        "enum": [
+          "yes",
+          "no",
+          "unclear"
+        ]
+      },
+      "target_name_used": {
+        "type": "string"
+      },
+      "menu_levels": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "level",
+            "prompt_heard",
+            "action_type"
+          ],
+          "properties": {
+            "level": {
+              "type": "integer"
+            },
+            "prompt_heard": {
+              "type": "string"
+            },
+            "options_offered": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "action_type": {
+              "type": "string",
+              "enum": [
+                "dtmf",
+                "speech",
+                "wait",
+                "none"
+              ]
+            },
+            "action_value": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "hold_seconds_estimate": {
+        "type": "number"
+      },
+      "final_answer": {
+        "type": "string"
+      }
+    }
+  },
+  "metadata": {
+    "pressone_scenario": "probe-p4-calle-hotline"
+  },
+  "idempotency_key": "pressone-p4-2026-09-07T11"
+}
