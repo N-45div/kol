@@ -1,0 +1,24 @@
+{
+  "name": "kol",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Get past the phone tree, and remember the way out. A CALL-E route atlas for IVR-gated status chases.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "demo": "node --env-file-if-exists=.env src/cli/demo.ts",
+    "chase": "node --env-file-if-exists=.env src/cli/chase.ts",
+    "atlas": "node --env-file-if-exists=.env src/cli/atlas.ts",
+    "probe": "node --env-file-if-exists=.env probes/run.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --env-file-if-exists=.env test/*.test.ts",
+    "dtmf": "node src/dtmf/cli.ts",
+    "twilio:check": "node --env-file-if-exists=.env scripts/twilio-check.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
+  }
+}
