@@ -101,7 +101,7 @@ decoder, and the IVR fixture. 31 tests, zero runtime dependencies.
 
 Not yet proven: whether CALL-E reliably presses keys when a route is dictated to it in prose.
 That is one call against the fixture, and it decides whether Replay is real or whether Kol is
-Explore-and-verify only. Notes in `PLAN.md`; platform findings in `docs/BUGLOG.md`.
+Explore-and-verify only.
 
 ## Licence
 

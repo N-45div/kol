@@ -12,3 +12,8 @@ fixtures/laptop/audio/
 fixtures/ivr-sim/.previous-voice.json
 fixtures/ivr-sim/logs/
 .venv/
+
+# Internal working notes live outside this repo, in ../kol-internal
+docs/
+PLAN.md
+*.local.md
