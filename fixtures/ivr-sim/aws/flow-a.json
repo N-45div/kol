@@ -1,0 +1,176 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "11111111-0000-4000-8000-000000000001",
+  "Actions": [
+    {
+      "Identifier": "11111111-0000-4000-8000-000000000001",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "Thank you for calling Fixture Health Plan. This is a test line used for software testing. No real member information is held here."
+      },
+      "Transitions": {
+        "NextAction": "11111111-0000-4000-8000-000000000002",
+        "Errors": [
+          { "NextAction": "11111111-0000-4000-8000-00000000000f", "ErrorType": "NoMatchingError" }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "11111111-0000-4000-8000-000000000002",
+      "Type": "GetParticipantInput",
+      "Parameters": {
+        "Text": "Please listen carefully, as our menu options have recently changed. For member eligibility, press 1. For claims, press 2. For provider services, press 3. To repeat this menu, press 9.",
+        "StoreInput": "False",
+        "InputTimeLimitSeconds": "8"
+      },
+      "Transitions": {
+        "NextAction": "11111111-0000-4000-8000-00000000000e",
+        "Conditions": [
+          {
+            "NextAction": "11111111-0000-4000-8000-00000000000a",
+            "Condition": { "Operator": "Equals", "Operands": ["1"] }
+          },
+          {
+            "NextAction": "11111111-0000-4000-8000-000000000003",
+            "Condition": { "Operator": "Equals", "Operands": ["2"] }
+          },
+          {
+            "NextAction": "11111111-0000-4000-8000-00000000000b",
+            "Condition": { "Operator": "Equals", "Operands": ["3"] }
+          },
+          {
+            "NextAction": "11111111-0000-4000-8000-000000000002",
+            "Condition": { "Operator": "Equals", "Operands": ["9"] }
+          }
+        ],
+        "Errors": [
+          { "NextAction": "11111111-0000-4000-8000-00000000000e", "ErrorType": "NoMatchingCondition" },
+          { "NextAction": "11111111-0000-4000-8000-00000000000e", "ErrorType": "InputTimeLimitExceeded" },
+          { "NextAction": "11111111-0000-4000-8000-00000000000e", "ErrorType": "NoMatchingError" }
+        ]
+      }
+    },
+    {
+      "Identifier": "11111111-0000-4000-8000-000000000003",
+      "Type": "GetParticipantInput",
+      "Parameters": {
+        "Text": "You selected option 2. Claims. For the status of an existing claim, press 1. To file a new claim, press 2. To speak with a representative, press 0.",
+        "StoreInput": "False",
+        "InputTimeLimitSeconds": "8"
+      },
+      "Transitions": {
+        "NextAction": "11111111-0000-4000-8000-00000000000e",
+        "Conditions": [
+          {
+            "NextAction": "11111111-0000-4000-8000-000000000004",
+            "Condition": { "Operator": "Equals", "Operands": ["1"] }
+          },
+          {
+            "NextAction": "11111111-0000-4000-8000-00000000000c",
+            "Condition": { "Operator": "Equals", "Operands": ["2"] }
+          },
+          {
+            "NextAction": "11111111-0000-4000-8000-000000000004",
+            "Condition": { "Operator": "Equals", "Operands": ["0"] }
+          }
+        ],
+        "Errors": [
+          { "NextAction": "11111111-0000-4000-8000-00000000000e", "ErrorType": "NoMatchingCondition" },
+          { "NextAction": "11111111-0000-4000-8000-00000000000e", "ErrorType": "InputTimeLimitExceeded" },
+          { "NextAction": "11111111-0000-4000-8000-00000000000e", "ErrorType": "NoMatchingError" }
+        ]
+      }
+    },
+    {
+      "Identifier": "11111111-0000-4000-8000-000000000004",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "Thank you. Connecting you to a claims representative. Your call is important to us. Please continue to hold. Your estimated wait time is under two minutes. Please continue to hold. All of our representatives are currently assisting other callers. Please continue to hold. Thank you for your patience."
+      },
+      "Transitions": {
+        "NextAction": "11111111-0000-4000-8000-000000000005",
+        "Errors": [
+          { "NextAction": "11111111-0000-4000-8000-00000000000f", "ErrorType": "NoMatchingError" }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "11111111-0000-4000-8000-000000000005",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "Claims department, this is Dana speaking. Let me look that up for you. Claim four four seven one was paid on August twelfth, in the amount of one thousand two hundred and forty dollars. Your confirmation reference is GREEN FALCON SEVEN. I repeat, GREEN FALCON SEVEN. Is there anything else I can help you with today?"
+      },
+      "Transitions": {
+        "NextAction": "11111111-0000-4000-8000-00000000000f",
+        "Errors": [
+          { "NextAction": "11111111-0000-4000-8000-00000000000f", "ErrorType": "NoMatchingError" }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "11111111-0000-4000-8000-00000000000a",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "You selected option 1. Member eligibility. This department cannot help with claim status. Your reference for this department is BLUE OTTER TWO. Goodbye."
+      },
+      "Transitions": {
+        "NextAction": "11111111-0000-4000-8000-00000000000f",
+        "Errors": [
+          { "NextAction": "11111111-0000-4000-8000-00000000000f", "ErrorType": "NoMatchingError" }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "11111111-0000-4000-8000-00000000000b",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "You selected option 3. Provider services. This department cannot help with claim status. Your reference for this department is RED MARLIN NINE. Goodbye."
+      },
+      "Transitions": {
+        "NextAction": "11111111-0000-4000-8000-00000000000f",
+        "Errors": [
+          { "NextAction": "11111111-0000-4000-8000-00000000000f", "ErrorType": "NoMatchingError" }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "11111111-0000-4000-8000-00000000000c",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "You selected option 2. New claim intake. This is not claim status. Your reference for this department is GREY HERON FOUR. Goodbye."
+      },
+      "Transitions": {
+        "NextAction": "11111111-0000-4000-8000-00000000000f",
+        "Errors": [
+          { "NextAction": "11111111-0000-4000-8000-00000000000f", "ErrorType": "NoMatchingError" }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "11111111-0000-4000-8000-00000000000e",
+      "Type": "MessageParticipant",
+      "Parameters": {
+        "Text": "We did not receive a valid selection. Your reference for this outcome is BLACK SPARROW ZERO. Goodbye."
+      },
+      "Transitions": {
+        "NextAction": "11111111-0000-4000-8000-00000000000f",
+        "Errors": [
+          { "NextAction": "11111111-0000-4000-8000-00000000000f", "ErrorType": "NoMatchingError" }
+        ],
+        "Conditions": []
+      }
+    },
+    {
+      "Identifier": "11111111-0000-4000-8000-00000000000f",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    }
+  ]
+}
