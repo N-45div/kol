@@ -28,11 +28,14 @@ export interface RouteStep {
 
 export type RouteStatus = 'fresh' | 'stale' | 'repairing' | 'unproven';
 
-export interface HoldStats {
+export interface DurationStats {
   samples: number;
   p50Seconds: number;
   p90Seconds: number;
 }
+
+/** Kept as a name because hold time is the statistic operators ask about first. */
+export type HoldStats = DurationStats;
 
 export interface Route {
   /** E.164. Masked whenever displayed or written to a committed artifact. */
@@ -45,6 +48,14 @@ export interface Route {
   targetName: string;
   steps: RouteStep[];
   hold?: HoldStats;
+  /**
+   * How long calls to this line actually took, kept per mode. Explore and replay are
+   * different journeys down the same tree, so averaging them together would describe neither.
+   */
+  observed?: {
+    explore?: DurationStats;
+    replay?: DurationStats;
+  };
   /** Hash over the menu structure. Drift is detected by comparing this. */
   fingerprint: string;
   version: number;

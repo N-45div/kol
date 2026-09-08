@@ -71,6 +71,10 @@ export class Atlas {
     report: NavigationReport;
     now: string;
     holdSeconds?: number;
+    /** Which journey this was, so durations are kept apart rather than averaged together. */
+    mode?: 'explore' | 'replay';
+    /** Wall-clock seconds from dialling to a terminal status. */
+    totalSeconds?: number;
   }): Promise<{ outcome: 'learned' | 'confirmed' | 'repaired' | 'quarantined'; route?: Route; drift?: DriftReport }> {
     await this.load();
     const key = routeKey(opts.lineE164, opts.goal);
@@ -97,6 +101,7 @@ export class Atlas {
         ...(opts.holdSeconds !== undefined
           ? { hold: { samples: 1, p50Seconds: opts.holdSeconds, p90Seconds: opts.holdSeconds } }
           : {}),
+        ...observedFor(undefined, opts.mode, opts.totalSeconds),
       };
       this.data.routes[key] = route;
       await this.save();
@@ -118,6 +123,7 @@ export class Atlas {
       existing.status = 'fresh';
       existing.lastVerifiedAt = opts.now;
       if (opts.holdSeconds !== undefined) existing.hold = mergeHold(existing.hold, opts.holdSeconds);
+      Object.assign(existing, observedFor(existing.observed, opts.mode, opts.totalSeconds));
       this.data.routes[key] = existing;
       await this.save();
       return { outcome: 'confirmed', route: existing, drift };
@@ -137,6 +143,7 @@ export class Atlas {
         confirmations: 1,
         corrections: existing.corrections + 1,
         ...(opts.holdSeconds !== undefined ? { hold: mergeHold(existing.hold, opts.holdSeconds) } : {}),
+        ...observedFor(existing.observed, opts.mode, opts.totalSeconds),
       };
       this.data.routes[key] = repaired;
       await this.save();
@@ -162,6 +169,25 @@ function toSteps(report: NavigationReport): RouteStep[] {
       action: { type: l.action_type, value: l.action_value ?? '' },
     }))
     .sort((a, b) => a.level - b.level);
+}
+
+/**
+ * Fold one call's duration into the per-mode statistics, leaving the other mode untouched.
+ * Returns a partial so callers can spread it, and returns nothing when there is no sample —
+ * an absent number is more honest than a zero.
+ */
+function observedFor(
+  prev: Route['observed'],
+  mode: 'explore' | 'replay' | undefined,
+  totalSeconds: number | undefined,
+): Pick<Route, 'observed'> | Record<string, never> {
+  if (!mode || totalSeconds === undefined) return prev ? { observed: prev } : {};
+  return {
+    observed: {
+      ...prev,
+      [mode]: mergeHold(prev?.[mode], totalSeconds),
+    },
+  };
 }
 
 function mergeHold(
