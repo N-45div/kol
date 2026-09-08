@@ -66,7 +66,7 @@ Replay is the default. No API key, no phone number, no calls placed:
 
 ```bash
 npm install
-npm test          # 31 tests
+npm test          # 42 tests
 npm run atlas     # what Kol believes about every line it has called
 ```
 
@@ -97,7 +97,8 @@ independent witness to which keys were pressed.
 
 Working: the Atlas (fingerprinting, drift classification, store, prose compiler), the CALL-E
 transport with recording and replay, the chase runner and its verification layer, the DTMF
-decoder, and the IVR fixture. 31 tests, zero runtime dependencies.
+decoder, the pre-flight estimate, the escalation ladder, and the IVR fixture. 42 tests,
+zero runtime dependencies.
 
 Not yet proven: whether CALL-E reliably presses keys when a route is dictated to it in prose.
 That is one call against the fixture, and it decides whether Replay is real or whether Kol is
