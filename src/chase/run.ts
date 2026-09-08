@@ -6,6 +6,7 @@ import { isReplayable, type NavigationReport, type Route } from '../atlas/types.
 import { pollUntilTerminal } from '../calle/poll.ts';
 import { allTurns, type CallRecord, type CalleTransport, type CreateCallRequest } from '../calle/types.ts';
 import { maskE164 } from '../util/mask.ts';
+import { preflight, type Preflight } from './preflight.ts';
 import { verifyAnswer, type Verification } from './verify.ts';
 
 /**
@@ -46,6 +47,8 @@ export interface ChaseResult {
   /** True when a person must look at this before the answer is used. */
   needsHuman: boolean;
   task: string;
+  /** What we told the operator this call would cost, before placing it. */
+  estimate: Preflight;
 }
 
 export interface ChaseOptions {
@@ -75,6 +78,10 @@ export async function runChase(request: ChaseRequest, opts: ChaseOptions): Promi
   const report = opts.onProgress ?? (() => {});
   report(`${mode === 'replay' ? 'Replaying a known route' : 'Exploring a new line'} — ${maskE164(request.lineE164)}`);
   if (route) report(`  route v${route.version}, confirmed ${route.confirmations}x: ${describeRoute(route)}`);
+
+  // Say what this is expected to cost before it costs it.
+  const estimate = preflight(known);
+  report(`  ${estimate.summary}`);
 
   const create: CreateCallRequest = {
     task,
@@ -123,6 +130,8 @@ export async function runChase(request: ChaseRequest, opts: ChaseOptions): Promi
         targetName: request.targetName,
         report: navigation,
         now,
+        mode,
+        totalSeconds,
         ...(navigation.hold_seconds_estimate !== undefined ? { holdSeconds: navigation.hold_seconds_estimate } : {}),
       })
     : await quarantine(atlas, request, navigation, now, verification.verdict);
@@ -147,6 +156,7 @@ export async function runChase(request: ChaseRequest, opts: ChaseOptions): Promi
     },
     needsHuman: verification.verdict !== 'verified',
     task,
+    estimate,
   };
 }
 
