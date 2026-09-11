@@ -6,6 +6,7 @@ node_modules/
 # Recorded call artifacts ARE committed - they are the zero-call judge path.
 # But never commit anything holding a real, unmasked number or a token.
 artifacts/**/*.raw.json
+artifacts/smoke-*/
 .scratch/
 fixtures/laptop/recordings/
 fixtures/laptop/audio/
