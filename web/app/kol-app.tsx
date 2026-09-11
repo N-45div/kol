@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import {
   AlertTriangle, ArrowDownToLine, ArrowRight, Check, CheckCircle2, ChevronRight,
   CircleDot, Clock3, FileCheck2, FlaskConical, Headphones, Info, Map, PhoneCall,
@@ -10,12 +11,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { claims, evaluationFamilies, type ClaimState, type DemoClaim } from './demo-data';
+import type { PublicCallState } from '@/lib/live-evidence';
 
-type View = 'claims' | 'evidence' | 'atlas' | 'methodology';
+type View = 'claims' | 'evidence' | 'live' | 'atlas' | 'methodology';
 
 const nav: { id: View; label: string; icon: typeof FileCheck2 }[] = [
   { id: 'claims', label: 'Claim chases', icon: FileCheck2 },
   { id: 'evidence', label: 'Evidence lab', icon: Headphones },
+  { id: 'live', label: 'Live receipt', icon: PhoneCall },
   { id: 'atlas', label: 'Route atlas', icon: Map },
   { id: 'methodology', label: 'Methodology', icon: FlaskConical },
 ];
@@ -32,7 +35,19 @@ export default function KolApp() {
   const [selectedId, setSelectedId] = useState('CLM-4471');
   const [filter, setFilter] = useState<'all' | ClaimState>('all');
   const [notice, setNotice] = useState('');
+  const [liveReceipt, setLiveReceipt] = useState<PublicCallState | null>(null);
   const selected = claims.find((claim) => claim.id === selectedId) ?? claims[0]!;
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const raw = window.sessionStorage.getItem('kol-live-receipt');
+      if (raw) {
+        try { setLiveReceipt(JSON.parse(raw) as PublicCallState); } catch { window.sessionStorage.removeItem('kol-live-receipt'); }
+      }
+      if (new URLSearchParams(window.location.search).get('view') === 'live') setView('live');
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   function runReplay() {
     setSelectedId('CLM-4471');
@@ -60,12 +75,19 @@ export default function KolApp() {
           {notice && <output className="mb-4 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"><span className="flex items-center gap-2"><CheckCircle2 className="size-4" />{notice}</span><button className="text-xs font-semibold" onClick={() => setNotice('')}>Dismiss</button></output>}
           {view === 'claims' && <ClaimsView selected={selected} setSelectedId={setSelectedId} filter={filter} setFilter={setFilter} openEvidence={() => setView('evidence')} />}
           {view === 'evidence' && <EvidenceView selected={selected} setSelectedId={setSelectedId} exportReceipt={exportReceipt} />}
+          {view === 'live' && <LiveReceiptView receipt={liveReceipt} />}
           {view === 'atlas' && <AtlasView />}
           {view === 'methodology' && <MethodologyView />}
         </section>
       </div>
     </main>
   );
+}
+
+function LiveReceiptView({ receipt }: { receipt: PublicCallState | null }) {
+  if (!receipt) return <><PageIntro eyebrow="Observed CALL-E result" title="No live receipt in this browser session." description="Complete an authorised call to bring its sanitised transcript and witness verdict into this console." action={<Link href="/call" className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">Run live demo</Link>} /><Card className="mt-5 border-0 shadow-sm"><CardContent className="py-12 text-center text-sm text-muted-foreground">Fixture evidence remains available in Evidence lab. Live transcripts are kept only in the current browser session.</CardContent></Card></>;
+  const tone = receipt.verdict === 'verified' ? 'bg-emerald-950' : receipt.verdict === 'contradicted' || receipt.verdict === 'unreachable' ? 'bg-rose-950' : 'bg-amber-950';
+  return <><PageIntro eyebrow="Observed CALL-E result" title="One call. Every witness exposed." description="This is the sanitised receipt returned by the real CALL-E call, not a fixture." action={<Badge className={`${tone} text-white`}>{receipt.verdict.replace('_', ' ')}</Badge>} /><div className="grid gap-4 py-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,.9fr)]"><Card className="gap-0 border-0 py-0 shadow-sm"><CardHeader className="border-b py-4"><CardTitle>Live transcript</CardTitle><p className="text-xs text-muted-foreground">{receipt.transcriptTurns} turns · CALL-E status {receipt.status}</p></CardHeader><CardContent className="space-y-2 py-5">{receipt.transcript.map((turn, index) => <div key={`${turn.offsetSeconds}-${index}`} className={`grid grid-cols-[42px_64px_1fr] gap-2 rounded-xl border p-3 text-xs ${turn.speaker === 'Recipient' ? 'border-emerald-200 bg-emerald-50/60' : 'bg-muted/25'}`}><span className="font-mono text-[10px] text-muted-foreground">{Math.round(turn.offsetSeconds)}s</span><strong>{turn.speaker}</strong><span className="leading-5">{turn.text}</span></div>)}</CardContent></Card><div className="space-y-4"><Card className="gap-0 border-0 py-0 shadow-sm"><CardHeader className="border-b py-4"><CardTitle>Live witness gate</CardTitle></CardHeader><CardContent className="space-y-2 py-4">{receipt.checks.map((item) => <div key={item.label} className="flex gap-3 rounded-xl border p-3"><span className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full ${item.passed ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>{item.passed ? <Check className="size-3.5" /> : <XCircle className="size-3.5" />}</span><div><p className="text-xs font-semibold">{item.label}</p><p className="mt-1 text-[11px] leading-4 text-muted-foreground">{item.detail}</p></div></div>)}</CardContent></Card><Card className={`${tone} border-0 text-white shadow-sm`}><CardContent><p className="text-[10px] font-semibold uppercase tracking-[.14em] opacity-70">Final disposition</p><p className="mt-2 text-2xl font-semibold capitalize">{receipt.verdict.replace('_', ' ')}</p><p className="mt-2 text-xs leading-5 opacity-80">{receipt.summary}</p></CardContent></Card></div></div></>;
 }
 
 function Header({ runReplay }: { runReplay: () => void }) {
