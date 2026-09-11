@@ -1,109 +1,145 @@
-# kol
+# Kol
 
-**Get past the phone tree, and remember the way.**
+**Verified payer-call operations for healthcare revenue-cycle teams.**
 
-Kol calls the automated menu on the other end of a business phone line, finds the route to
-the department you need, and writes it down. The next call to that line replays the route
-instead of listening to the whole menu again. When the company reshuffles its options, Kol
-notices, re-navigates, and repairs its own map.
+A medical biller should not have to choose between spending twenty-five minutes on a payer
+phone tree and trusting an AI-generated financial answer. Kol uses CALL-E to chase a claim,
+remembers the IVR route for the next chase, and withholds the result unless independent
+witnesses support the claim, the destination, and the route taken.
 
-Built on [CALL-E](https://www.heycall-e.com/).
+## The healthcare problem
 
-## Why
+The [2024 CAQH Index](https://www.caqh.org/hubfs/Index/2024%20Index%20Report/CAQH_IndexReport_2024_FINAL.pdf)
+reports that a manual claim-status inquiry takes medical staff 25 minutes and that the medical
+industry spent $11 billion on claim-status inquiries in 2023. The
+[AMA's 2025 survey](https://www.ama-assn.org/practice-management/prior-authorization/only-1-3-doctors-trusts-insurers-prior-authorization)
+reports 40 prior authorizations and 13 staff hours per physician each week, with phone still
+the most common channel for medical-service prior authorization.
 
-A claim-status inquiry by phone costs a US medical billing team **25 minutes** of staff time;
-the same question asked electronically takes 7. Around **$11 billion** a year goes into asking
-payers questions over the phone, and roughly **$2.4 billion** of that is automatable (CAQH
-2024 Index). Physicians and their staff spend **13 hours a week** on prior authorisation, and
-the phone is the most common way it gets done (AMA 2025 Prior Authorization Survey, n=1,000).
+Automating payer calls is no longer the unoccupied idea. The unresolved operational question
+is what happens after an agent says, “Claim 4471 was paid $1,240 on August 12.” A correctly
+shaped answer can still be wrong, unsupported, or collected from the wrong department.
 
-None of that is a conversation problem. It is a *navigation* problem: menus, submenus, and
-hold music standing between a caller and a fifteen-second answer.
+Kol treats the agent as a participant, not the sole witness.
 
-Every phone agent in this space — CALL-E's own navigator, Pipecat's IVR module, Google's
-Direct My Call, Apple's Hold Assist — learns the menu from scratch on every call and takes its
-own word for where it ended up. **Nobody keeps the map, and nobody checks the answer against
-the tree.** That gap is what Kol fills.
+## What makes a result usable
 
-## How it works
+The claim-result gate checks:
 
-### The Route Atlas
+1. **Question witness** — the CALL-E transcript must show that the agent actually asked the
+   claim-specific question.
+2. **Answer witness** — every status and financial field must be present in an exact payer-side
+   evidence quote.
+3. **Destination witness** — payer-side words must establish that the intended claims desk
+   answered; matching numbers from another department are still rejected.
+4. **Route witness** — the model-reported keypress trail must match an independent fixture log,
+   decoded DTMF audio, or provider event receipt.
+5. **Provider corroboration** — low CALL-E confidence can downgrade a result, but high confidence
+   can never override missing evidence.
 
-A versioned map of one line's menu tree, keyed by `(number, goal)`.
+Only a verified call may teach the Route Atlas. A contradiction quarantines the route so the
+next call explores instead of confidently repeating a stale path.
 
-- **Explore** — the first call is told to reach a named department and to *report the menu it
-  heard and the keys it pressed*. The navigation comes back through `result_schema`, so the
-  call describes its own route as structured data.
-- **Replay** — the stored route is compiled into the task text of later calls. CALL-E's API
-  accepts no navigation parameters at all, so the Atlas has to be expressed in prose precise
-  enough to steer a keypress. That compiler is the load-bearing piece of this project.
-- **Repair** — the prompts heard are fingerprinted by their *option-to-key mapping*, not their
-  wording, so a changed greeting is noise while a moved option is drift. The same call that
-  uses a stale route also fixes it: the instructions tell it to abandon the route the moment
-  what it hears stops matching, and to report what the menu says now.
+## Route Atlas
 
-### Verification
+Each route is versioned by `(payer line, goal)` and stores menu levels, actions, timings,
+confirmations, and corrections.
 
-An answer is not believed because a model returned it. Four independent checks run against the
-transcript, and a verdict is never better than the weakest:
+- **Explore:** CALL-E listens to the current menu and reports the prompts and actions.
+- **Replay:** Kol compiles a proven route into the next CALL-E task, while instructing the agent
+  to abandon it immediately when the real menu differs.
+- **Repair:** option-to-key fingerprints distinguish harmless rewording from remapped or
+  restructured menus. A verified re-navigation replaces the stale route.
+- **Quarantine:** a contradicted answer cannot update route memory.
 
-| Check | Catches |
-| --- | --- |
-| Reached a human | Voicemail dressed up as an answer |
-| Every number in the answer was spoken | The classic failure: right shape, wrong amount |
-| The destination marker was heard | Landing in the wrong department and answering anyway |
-| Provider confidence above a floor | The model's own uncertainty |
+Mapping the menu is an efficiency feature. Evidence-gated claim results are the product.
 
-The number check hears `"four four seven one"` as `4471` and `"one thousand two hundred and
-forty"` as `1240`, because that is how a person reads a claim number and an amount aloud.
+## Safe, zero-call demonstration
 
-**Only a verified call may teach the Atlas.** A contradicted call is precisely the one whose
-route must not be learned — it is the evidence that the route led somewhere wrong.
-
-## Running it
-
-Replay is the default. No API key, no phone number, no calls placed:
+Requires Node.js 22.18 or newer.
 
 ```bash
 npm install
-npm test          # 42 tests
-npm run atlas     # what Kol believes about every line it has called
+npm run demo
+npm test
+npm run eval
 ```
 
-A live call needs `CALLE_API_KEY` in `.env` (see `.env.example`), `KOL_MODE=live`, and an
-explicit `--confirm`. The masked destination and the cost are printed before anything dials.
+`npm run demo` replays three fictional healthcare cases: a verified paid claim, a plausible
+answer from the wrong department, and a changed keypress trail. It never touches the network.
+
+The seeded evaluation covers 640 cases across eight families: clean paid, clean denied,
+fabricated amount, wrong department with matching numbers, question never asked, route
+mismatch, missing independent route receipt, and low provider confidence. Current result:
+
+```text
+safe results accepted 160/160
+unsafe results held   480/480
+unsafe auto-accepts   0
+```
+
+These are synthetic evaluation results, not a measurement of CALL-E or payer-call accuracy.
+See [METHODOLOGY.md](METHODOLOGY.md) for the claim boundary.
+
+## Judge-facing product
 
 ```bash
-npm run chase -- --line +1XXXXXXXXXX --goal claim_status \
-  --ask "what is the current status of claim 4471" --ref 4471 \
-  --marker "GREEN FALCON SEVEN" --confirm
+npm run web:dev
 ```
 
-Every live response is written to `artifacts/` the moment it lands, and those recordings are
-what replay mode reads back — so any run can be reproduced later without spending a call.
+The product UI is a replay-only healthcare operations desk: claim worklist, field-level
+evidence, route atlas, drift review, and measured evaluation. It uses fictional data and cannot
+spend CALL-E credits.
 
-## Fixtures
+## One authorized live call
 
-`fixtures/ivr-sim/` is a two-level synthetic phone menu ("Fixture Health Plan") served as
-TwiML, with a second variant where the claims option moves from 2 to 3 for testing drift. It
-logs every keypress server-side, and each branch ends in a distinct passphrase, so we learn
-where a call actually landed from a source the model cannot influence. Development never
-dials a real business.
+Live execution is opt-in and places a real outbound call. Use only a line you own or are
+authorized to call, and never place real patient information in a hackathon test.
 
-`src/dtmf/` decodes DTMF tones out of a call recording with a Goertzel filter — a second,
-independent witness to which keys were pressed.
+```bash
+# .env
+CALLE_API_KEY=...
+KOL_MODE=live
 
-## Status
+npm run chase -- --line +1XXXXXXXXXX --goal claim_status \
+  --ask "what is the current status of fictional claim 4471" --ref 4471 \
+  --marker "FIXTURE DESTINATION MARKER" --confirm
+```
 
-Working: the Atlas (fingerprinting, drift classification, store, prose compiler), the CALL-E
-transport with recording and replay, the chase runner and its verification layer, the DTMF
-decoder, the pre-flight estimate, the escalation ladder, and the IVR fixture. 42 tests,
-zero runtime dependencies.
+Before dialing, Kol prints the masked destination and estimated call cost. Live requests use a
+stable idempotency key; ambiguous create outcomes are not blindly redialed. Responses are
+recorded in masked artifacts for replay.
 
-Not yet proven: whether CALL-E reliably presses keys when a route is dictated to it in prose.
-That is one call against the fixture, and it decides whether Replay is real or whether Kol is
-Explore-and-verify only.
+## Healthcare boundary
 
-## Licence
+Kol is an administrative RCM prototype. It does not provide medical advice, diagnose, triage,
+make coverage decisions, appeal denials, accept settlements, authorize payments, or write to an
+EHR or practice-management system. The demo contains no PHI. This repository does not claim
+HIPAA compliance or production readiness; any production deployment would require a formal
+security, privacy, vendor, and BAA assessment.
 
-MIT.
+## Project map
+
+```text
+src/atlas/        versioned IVR routes, fingerprints, drift, repair
+src/calle/        CALL-E API transport, polling, masking, replay
+src/chase/        call planning, evidence gate, escalation, preflight
+src/healthcare/   claim-status schema, independent witness verifier, eval corpus
+src/dtmf/         Goertzel-based DTMF decoder
+fixtures/         fictional IVR and laptop-call fixtures
+artifacts/        masked replay records from controlled probes
+web/              judge-facing replay-only healthcare UI
+schemas/          portable route interchange contract
+```
+
+## Current proof
+
+- 54 automated tests pass with zero root runtime dependencies.
+- The 640-case synthetic adversarial matrix has zero unsafe auto-accepts.
+- CALL-E reachability and transcript capture have been observed on a controlled public hotline.
+- Prose-guided keypad replay against Kol's owned IVR fixture is still a live-proof requirement;
+  it is not silently represented as completed.
+
+## License
+
+MIT
