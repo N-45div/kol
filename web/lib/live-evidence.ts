@@ -71,13 +71,13 @@ export function buildPublicCallState(call: ProviderCall): PublicCallState {
     .map((turn) => ({
       offsetSeconds: Number(turn.offset_seconds ?? 0),
       speaker: turn.speaker === 'bot' ? 'Kol' as const : 'Recipient' as const,
-      text: String(turn.text ?? '').trim(),
+      text: maskSensitive(String(turn.text ?? '').trim()),
     }))
     .filter((turn) => turn.text)
     .sort((a, b) => a.offsetSeconds - b.offsetSeconds);
   const terminal = TERMINAL.has(status);
   const phraseInTranscript = transcript.some((turn) => turn.speaker === 'Recipient' && normalise(turn.text).includes(TEST_PHRASE));
-  const phraseHeard = phraseInTranscript || booleanValue(result.test_phrase_heard);
+  const phraseHeard = phraseInTranscript;
 
   const common = {
     callId: String(call.id ?? call.call_id ?? ''),
@@ -179,12 +179,14 @@ function supportsDepartment(value: string) {
 
 function supportsReference(value: string) {
   const text = normalise(value);
-  return digits(text).includes(CLAIM_DEMO.reference) || text.includes('four four seven one');
+  return /\b4471\b/.test(text) || /\b4\s+4\s+7\s+1\b/.test(text) || text.includes('four four seven one');
 }
 
 function supportsAmount(value: string) {
   const text = normalise(value);
-  return canonicalAmount(text).includes('1240') || text.includes('one thousand two hundred forty');
+  const numericMatch = [...value.matchAll(/(?:\$\s*)?\d[\d,]*(?:\.\d+)?/g)]
+    .some((match) => canonicalAmount(match[0]) === '1240');
+  return numericMatch || text.includes('one thousand two hundred forty');
 }
 
 function supportsDate(value: string) {
@@ -193,4 +195,13 @@ function supportsDate(value: string) {
   const hasMonthDay = text.includes('august 12') || text.includes('august twelfth');
   const hasYear = text.includes('2026') || text.includes('twenty twenty six') || text.includes('two thousand twenty six');
   return hasMonthDay && hasYear;
+}
+
+function maskSensitive(value: string) {
+  return value
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[email masked]')
+    .replace(/\+?\d[\d ()-]{7,}\d/g, (match) => {
+      const number = match.replace(/\D/g, '');
+      return number.length > 4 ? `••••${number.slice(-4)}` : '••••';
+    });
 }

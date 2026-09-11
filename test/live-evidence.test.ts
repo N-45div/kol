@@ -37,6 +37,26 @@ test('does not accept the phrase from the agent side', () => {
   assert.equal(state.verdict, 'needs_review');
 });
 
+test('does not let structured extraction verify a phrase missing from recipient evidence', () => {
+  const source = call({ structured_result: { test_phrase_heard: true, exact_phrase: 'Kol test received' } });
+  source.recipients![0]!.attempts![0]!.transcript_turns = [
+    { offset_seconds: 1, speaker: 'bot', text: 'Please say Kol test received.' },
+    { offset_seconds: 4, speaker: 'user', text: 'Okay.' },
+  ];
+  assert.equal(buildPublicCallState(source).verdict, 'needs_review');
+});
+
+test('masks contact details before a transcript reaches the browser', () => {
+  const source = call();
+  source.recipients![0]!.attempts![0]!.transcript_turns = [
+    { offset_seconds: 1, speaker: 'user', text: 'Call me at +91 95991 25425 or me@example.com. Kol test received.' },
+  ];
+  const text = buildPublicCallState(source).transcript[0]!.text;
+  assert.equal(text.includes('95991'), false);
+  assert.equal(text.includes('example.com'), false);
+  assert.match(text, /5425/);
+});
+
 test('grounds every fictional claim field but withholds without an independent route witness', () => {
   const source = call({
     metadata: { kol_scenario: 'fictional-claim-evidence-demo' },

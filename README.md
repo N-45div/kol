@@ -143,7 +143,7 @@ schemas/          portable route interchange contract
 
 ## Current proof
 
-- 61 automated tests pass with zero root runtime dependencies.
+- 63 automated tests pass with zero root runtime dependencies.
 - The 640-case synthetic adversarial matrix has zero unsafe auto-accepts.
 - CALL-E completed a guarded call to an allowlisted India destination with 14 transcript turns.
 - Prose-guided keypad replay against Kol's owned IVR fixture is still a live-proof requirement;
