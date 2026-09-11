@@ -83,6 +83,12 @@ See [METHODOLOGY.md](METHODOLOGY.md) for the claim boundary.
 
 ## Judge-facing product
 
+Live Vercel demo: **https://kol-verified-payer-calls.vercel.app**
+
+- `/` explains the healthcare problem and Kol's evidence model.
+- `/console` replays the claim worklist, evidence lab, Route Atlas, and methodology.
+- `/call` places one PIN- and allowlist-gated CALL-E smoke test without collecting PHI.
+
 ```bash
 npm run web:dev
 ```
@@ -139,6 +145,7 @@ schemas/          portable route interchange contract
 - CALL-E reachability and transcript capture have been observed on a controlled public hotline.
 - Prose-guided keypad replay against Kol's owned IVR fixture is still a live-proof requirement;
   it is not silently represented as completed.
+- CALL-E submission PR: https://github.com/CALLE-AI/awesome-phone-call-agents/pull/453
 
 ## License
 
