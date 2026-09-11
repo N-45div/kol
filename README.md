@@ -86,16 +86,19 @@ See [METHODOLOGY.md](METHODOLOGY.md) for the claim boundary.
 Live Vercel demo: **https://kol-verified-payer-calls.vercel.app**
 
 - `/` explains the healthcare problem and Kol's evidence model.
-- `/console` replays the claim worklist, evidence lab, Route Atlas, and methodology.
-- `/call` places one PIN- and allowlist-gated CALL-E smoke test without collecting PHI.
+- `/console` contains the claim worklist, fixture evidence lab, observed live receipt, Route
+  Atlas, and methodology.
+- `/call` runs either a reachability check or a fixed fictional claim-evidence role-play. It
+  displays the real transcript, structured extraction, deterministic checks, and verdict.
 
 ```bash
 npm run web:dev
 ```
 
-The product UI is a replay-only healthcare operations desk: claim worklist, field-level
-evidence, route atlas, drift review, and measured evaluation. It uses fictional data and cannot
-spend CALL-E credits.
+The product UI separates synthetic and observed evidence. Fixture replay demonstrates the
+complete independent-witness gate without spending credits. The guarded live path can spend a
+CALL-E credit, but only for an allowlisted destination after PIN and explicit confirmation.
+Its sanitised receipt is carried into the evidence console for the current browser session.
 
 ## One authorized live call
 
@@ -134,15 +137,15 @@ src/healthcare/   claim-status schema, independent witness verifier, eval corpus
 src/dtmf/         Goertzel-based DTMF decoder
 fixtures/         fictional IVR and laptop-call fixtures
 artifacts/        masked replay records from controlled probes
-web/              judge-facing replay-only healthcare UI
+web/              judge-facing fixture lab and guarded live evidence workflow
 schemas/          portable route interchange contract
 ```
 
 ## Current proof
 
-- 56 automated tests pass with zero root runtime dependencies.
+- 61 automated tests pass with zero root runtime dependencies.
 - The 640-case synthetic adversarial matrix has zero unsafe auto-accepts.
-- CALL-E reachability and transcript capture have been observed on a controlled public hotline.
+- CALL-E completed a guarded call to an allowlisted India destination with 14 transcript turns.
 - Prose-guided keypad replay against Kol's owned IVR fixture is still a live-proof requirement;
   it is not silently represented as completed.
 - CALL-E submission PR: https://github.com/CALLE-AI/awesome-phone-call-agents/pull/453

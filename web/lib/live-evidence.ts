@@ -128,10 +128,10 @@ function evaluateClaim(transcript: PublicCallState['transcript'], result: Record
   const checks = [
     check('Call completed', true, 'CALL-E completed the authorised mock-payer call.'),
     check('Question witness', supportsQuestion(agentText), 'The agent transcript must contain the claim-specific question.'),
-    check('Destination witness', supportsDepartment(payerText), 'Recipient-side words must establish the claims status department.'),
+    check('Destination witness', supportsDepartment(payerText) && supportsDepartment(extracted.department), 'Both extraction and recipient-side words must establish the claims status department.'),
     check('Claim reference', supportsReference(payerText) && digits(extracted.claimReference) === CLAIM_DEMO.reference, 'Both extraction and recipient transcript must identify fictional claim 4471.'),
     check('Status witness', normalise(payerText).includes('paid') && normalise(extracted.status) === 'paid', 'Both extraction and recipient transcript must support paid status.'),
-    check('Amount witness', supportsAmount(payerText) && canonicalAmount(extracted.amount) === '1240', 'Both extraction and recipient transcript must support $1,240.'),
+    check('Amount witness', supportsAmount(payerText) && supportsAmount(extracted.amount), 'Both extraction and recipient transcript must support $1,240.'),
     check('Date witness', supportsDate(payerText) && supportsDate(extracted.paymentDate), 'Both extraction and recipient transcript must support August 12, 2026.'),
     check('Independent route receipt', false, 'A direct phone role-play has no independent IVR keypress witness.'),
   ];
