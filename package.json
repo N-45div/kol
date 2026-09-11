@@ -9,13 +9,17 @@
   },
   "scripts": {
     "demo": "node --env-file-if-exists=.env src/cli/demo.ts",
+    "eval": "node src/cli/eval.ts",
     "chase": "node --env-file-if-exists=.env src/cli/chase.ts",
     "atlas": "node --env-file-if-exists=.env src/cli/atlas.ts",
     "probe": "node --env-file-if-exists=.env probes/run.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --test --env-file-if-exists=.env test/*.test.ts",
     "dtmf": "node src/dtmf/cli.ts",
-    "twilio:check": "node --env-file-if-exists=.env scripts/twilio-check.ts"
+    "twilio:check": "node --env-file-if-exists=.env scripts/twilio-check.ts",
+    "web:dev": "npm --prefix web run dev",
+    "web:build": "npm --prefix web run build",
+    "validate": "npm run typecheck && npm test && npm run eval && npm run web:build"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",

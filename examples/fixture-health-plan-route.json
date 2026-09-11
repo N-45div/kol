@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "line": "+12025550123",
+  "goal": "claim_status",
+  "target": "claims status department",
+  "version": 2,
+  "status": "fresh",
+  "fingerprint": "fixture-claims-v2",
+  "lastVerifiedAt": "2026-09-11T08:00:00Z",
+  "steps": [
+    {
+      "level": 1,
+      "prompt": "For eligibility press 1. For claims press 2.",
+      "action": { "type": "dtmf", "value": "2" }
+    },
+    {
+      "level": 2,
+      "prompt": "For claim status press 1. For a new claim press 2.",
+      "action": { "type": "dtmf", "value": "1" }
+    }
+  ]
+}
