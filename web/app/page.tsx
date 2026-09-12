@@ -69,7 +69,7 @@ export default function Home() {
           {[
             ['25 min', 'Manual claim-status inquiry', 'CAQH 2024 Index'],
             ['$11B', 'Annual medical claim-status spend', 'CAQH 2024 Index'],
-            ['640', 'Deterministic adversarial cases', '160 safe · 480 unsafe'],
+            ['2,000', 'Deterministic adversarial verdicts', '720 single-claim · 1,280 multi-claim'],
           ].map(([value, label, source]) => <div key={value} className="py-8 sm:px-8 sm:first:pl-0"><p className="text-3xl font-semibold tracking-[-.05em]">{value}</p><p className="mt-1 text-sm font-medium">{label}</p><p className="mt-1 text-xs text-[#71817e]">{source}</p></div>)}
         </div>
       </section>

@@ -76,4 +76,10 @@ export const evaluationFamilies = [
   ['Route mismatch', '80 / 80 withheld', 100],
   ['Missing route receipt', '80 / 80 withheld', 100],
   ['Low confidence', '80 / 80 withheld', 100],
+  ['Provider evidence unsupported', '80 / 80 withheld', 100],
+  ['Multi-claim: clean', '240 / 240 accepted', 100],
+  ['Multi-claim: crossed answer', '80 / 80 withheld', 100],
+  ['Multi-claim: invented claim', '80 / 80 withheld', 100],
+  ['Multi-claim: unanswered claim', '80 / 80 withheld', 100],
+  ['Multi-claim: ambiguous quote', '80 / 80 withheld', 100],
 ] as const;
