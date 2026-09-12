@@ -126,6 +126,15 @@ Live Vercel demo: **https://kol-verified-payer-calls.vercel.app**
 npm run web:dev
 ```
 
+Every live chase is a **durable Vercel Workflow run**. The call is created exactly once inside
+the run, with no retries and an idempotency key derived from the run, so an ambiguous outcome
+can never dial twice. Polling is checkpointed, and after the call ends the run suspends on a
+hook until the person who answered attaches the tones they heard, whether that takes a minute
+or a day. The verdict is the run's return value. Two scripts prove it without a call:
+`npm --prefix web run e2e:chase` drives one run end to end against a stand-in CALL-E, and
+`npm --prefix web run e2e:crash` kills the dev server mid-poll, restarts it, and asserts the
+same run finishes verified with one create.
+
 The product UI separates synthetic and observed evidence. Fixture replay demonstrates the
 complete independent-witness gate without spending credits. The guarded live path can spend a
 CALL-E credit, but only for an allowlisted destination after PIN and explicit confirmation.
@@ -162,6 +171,7 @@ recorded in masked artifacts for replay.
 | `GET /v1/calls/{id}` | Polling and reconciliation; every response is recorded, masked, and replayable without a network |
 | `GET /v1/calls/{id}/events` | Recorded alongside each call for the audit trail |
 | `webhook_url` | Accepted on the request; terminal webhooks are unsigned, so Kol reconciles through `GET` before acting on one |
+| `Idempotency-Key` derived from the durable run | The create step inside the Workflow run has no retries; a replay or restart re-presents the same key and CALL-E returns the same call |
 
 ## Healthcare boundary
 
@@ -181,7 +191,7 @@ src/healthcare/   claim-status schema, independent witness verifier, eval corpus
 src/dtmf/         Goertzel-based DTMF decoder
 fixtures/         fictional IVR and laptop-call fixtures
 artifacts/        masked replay records from controlled probes
-web/              judge-facing fixture lab and guarded live evidence workflow
+web/              judge-facing fixture lab, guarded live lab, and the durable chase run (web/workflows)
 schemas/          portable route interchange contract
 ```
 
