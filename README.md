@@ -148,7 +148,8 @@ schemas/          portable route interchange contract
 - CALL-E completed a guarded call to an allowlisted India destination with 14 transcript turns.
 - Prose-guided keypad replay against Kol's owned IVR fixture is still a live-proof requirement;
   it is not silently represented as completed.
-- CALL-E submission PR: https://github.com/CALLE-AI/awesome-phone-call-agents/pull/453
+- CALL-E contribution merged upstream on 11 Sep 2026 as `skills/kol-ivr-route` and
+  `apps/typescript/kol`: https://github.com/CALLE-AI/awesome-phone-call-agents/pull/453
 
 ## License
 
