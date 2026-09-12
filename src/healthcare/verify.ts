@@ -114,8 +114,22 @@ export function verifyClaimOutcome(input: VerifyClaimInput): ClaimVerification {
   corroborating(checks, 'CALL-E confidence', confidenceOk,
     confidence === undefined ? 'provider confidence unavailable' : `${confidence.toFixed(2)} against ${minConfidence.toFixed(2)} floor`);
 
+  // CALL-E attaches its own justifications to a result. They are the model explaining itself,
+  // so they get the same treatment as the structured fields: anything they assert about
+  // status or money must have been said by the payer. A provider that reports "the
+  // representative confirmed payment of $1,500" when nobody said 1,500 has told us it is
+  // narrating, and a narrated result is not auto-accepted.
+  const unsupportedEvidence = unsupportedProviderClaims(input.call.evidence ?? [], payerText);
+  const providerEvidenceOk = unsupportedEvidence.length === 0;
+  corroborating(checks, 'provider evidence cross-examined', providerEvidenceOk,
+    (input.call.evidence ?? []).length === 0
+      ? 'no provider evidence attached'
+      : providerEvidenceOk
+        ? `${input.call.evidence!.length} provider justification(s) are consistent with payer speech`
+        : `provider evidence asserts ${unsupportedEvidence.join(', ')} which the payer never said`);
+
   const failed = checks.filter((check) => check.severity === 'required' && !check.passed);
-  if (failed.length === 0 && confidenceOk) {
+  if (failed.length === 0 && confidenceOk && providerEvidenceOk) {
     return result('verified', checks, 'Transcript, destination, claim fields, and independent route receipt agree.');
   }
   const contradictionNames = new Set(['claim reference bound', 'claims department established', 'claim status supported', 'paid amount supported', 'payment date supported', 'denial code supported', 'keypress trail matches']);
@@ -127,6 +141,28 @@ export function verifyClaimOutcome(input: VerifyClaimInput): ClaimVerification {
       ? 'At least one witness conflicts with the structured result. Do not write it to the claim record.'
       : 'Evidence is incomplete. A biller must review the call before using the result.',
   );
+}
+
+/**
+ * Facts a provider justification asserts that the payer transcript does not contain: a claim
+ * status word, or any number of three or more digits (an amount, a year, a reference).
+ */
+function unsupportedProviderClaims(evidence: string[], payerText: string): string[] {
+  const payer = normalise(payerText);
+  const payerNumbers = numbersIn(payerText);
+  const missing: string[] = [];
+  for (const item of evidence) {
+    const text = normalise(item);
+    for (const [status, phrases] of Object.entries(STATUS_WORDS)) {
+      if (status === 'unknown') continue;
+      const asserted = phrases.find((phrase) => text.includes(normalise(phrase)));
+      if (asserted && !phrases.some((phrase) => payer.includes(normalise(phrase)))) missing.push(`"${asserted}"`);
+    }
+    for (const number of numbersIn(item)) {
+      if (number.replace(/\D/g, '').length >= 3 && !payerNumbers.has(number)) missing.push(number);
+    }
+  }
+  return [...new Set(missing)];
 }
 
 function result(verdict: ClaimVerification['verdict'], checks: WitnessCheck[], summary: string): ClaimVerification {

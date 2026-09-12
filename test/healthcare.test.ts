@@ -51,10 +51,25 @@ test('a returned payment year must be present in payer evidence', () => {
   assert.equal(result.checks.find((check) => check.name === 'payment date supported')?.passed, false);
 });
 
-test('the seeded 640-case matrix has zero unsafe auto-accepts', () => {
+test('the seeded 720-case matrix has zero unsafe auto-accepts', () => {
   const metrics = evaluateCorpus();
-  assert.equal(metrics.cases, 640);
+  assert.equal(metrics.cases, 720);
   assert.equal(metrics.safeAccepted, 160);
-  assert.equal(metrics.unsafeWithheld, 480);
+  assert.equal(metrics.unsafeWithheld, 560);
   assert.equal(metrics.unsafeAccepted, 0);
+});
+
+test('provider evidence that narrates an amount nobody said blocks auto-accept', () => {
+  const result = verifyClaimOutcome(makeClaimFixture('provider_evidence_unsupported', 27).input);
+  assert.equal(result.autoAccept, false);
+  assert.equal(result.verdict, 'needs_review', 'the payer fields themselves are fine; the provider narration is not');
+  const check = result.checks.find((c) => c.name === 'provider evidence cross-examined')!;
+  assert.equal(check.passed, false);
+  assert.match(check.detail, /never said/);
+});
+
+test('provider evidence that agrees with the payer changes nothing', () => {
+  const result = verifyClaimOutcome(makeClaimFixture('clean_paid', 28).input);
+  assert.equal(result.autoAccept, true);
+  assert.equal(result.checks.find((c) => c.name === 'provider evidence cross-examined')!.passed, true);
 });

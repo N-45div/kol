@@ -10,7 +10,8 @@ export type FixtureKind =
   | 'never_asked'
   | 'route_mismatch'
   | 'missing_route_receipt'
-  | 'low_confidence';
+  | 'low_confidence'
+  | 'provider_evidence_unsupported';
 
 export interface ClaimFixture {
   id: string;
@@ -63,6 +64,13 @@ export function makeClaimFixture(kind: FixtureKind, index = 0): ClaimFixture {
       score: kind === 'low_confidence' ? 0.31 : 0.94,
       label: kind === 'low_confidence' ? 'low' : 'high',
     },
+    // The provider's own justification. Consistent with the payer in every family but one,
+    // where it narrates an amount nobody said.
+    evidence: kind === 'provider_evidence_unsupported'
+      ? [`The representative confirmed that claim ${claimReference} was paid $${(paidAmountNumber + 300).toLocaleString('en-US')}.`]
+      : kind === 'clean_denied'
+        ? [`The representative stated that claim ${claimReference} is denied under code CO-16.`]
+        : [`The representative stated that claim ${claimReference} was paid ${paidAmount} on August 12, 2026.`],
     recipients: [{
       attempts: [{
         transcript_turns: [
@@ -103,4 +111,5 @@ export const FIXTURE_KINDS: FixtureKind[] = [
   'route_mismatch',
   'missing_route_receipt',
   'low_confidence',
+  'provider_evidence_unsupported',
 ];
