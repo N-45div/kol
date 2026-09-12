@@ -18,3 +18,5 @@ fixtures/ivr-sim/logs/
 docs/
 PLAN.md
 *.local.md
+
+web/tsconfig.tsbuildinfo

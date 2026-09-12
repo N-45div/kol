@@ -1,11 +1,19 @@
 # Kol
 
-**Verified payer-call operations for healthcare revenue-cycle teams.**
+[![validate](https://github.com/N-45div/kol/actions/workflows/validate.yml/badge.svg)](https://github.com/N-45div/kol/actions/workflows/validate.yml)
 
-A medical biller should not have to choose between spending twenty-five minutes on a payer
-phone tree and trusting an AI-generated financial answer. Kol uses CALL-E to chase a claim,
-remembers the IVR route for the next chase, and withholds the result unless independent
-witnesses support the claim, the destination, and the route taken.
+**The AI caller is never the only witness.** Kol makes CALL-E prove a payer call: the question
+it asked, the words the payer answered with, the department that answered, and the keypad
+route it took must each be backed by a witness the model cannot write itself, or the answer
+is held. A route that passes teaches the Route Atlas, so the next chase replays it by keypad
+instead of exploring the phone tree again.
+
+This is only possible because one CALL-E request returns a speaker-labelled, time-offset
+transcript, a strict structured result, and keypad navigation of the phone tree together.
+Kol turns those into evidence that can disagree with each other.
+
+Built for healthcare revenue-cycle teams, where a medical biller currently spends twenty-five
+minutes per claim-status call and a correctly shaped wrong answer becomes a financial record.
 
 ## The healthcare problem
 
@@ -88,7 +96,10 @@ Live Vercel demo: **https://kol-verified-payer-calls.vercel.app**
 - `/` explains the healthcare problem and Kol's evidence model.
 - `/console` contains the claim worklist, fixture evidence lab, observed live receipt, Route
   Atlas, and methodology.
-- `/call` runs either a reachability check or a fixed fictional claim-evidence role-play. It
+- `/call` places one guarded live call in one of three modes: a reachability check, a fixed
+  fictional claim-evidence role-play, or an **IVR route replay**, where the person who answers
+  reads a two-level phone menu aloud, CALL-E replays the atlas route by keypad, and the
+  operator then enters the tones they heard as a receipt independent of the model. Each mode
   displays the real transcript, structured extraction, deterministic checks, and verdict.
 
 ```bash
@@ -119,6 +130,19 @@ Before dialing, Kol prints the masked destination and estimated call cost. Live 
 stable idempotency key; ambiguous create outcomes are not blindly redialed. Responses are
 recorded in masked artifacts for replay.
 
+## CALL-E surface Kol uses
+
+| CALL-E capability | Where Kol depends on it |
+| --- | --- |
+| `POST /v1/calls` with `task`, `result_schema`, `metadata`, `Idempotency-Key` | Every live call; the atlas compiles a route into `task`, and the idempotency key stops an ambiguous outcome from dialling twice |
+| IVR navigation by keypad from task prose | Replay: the route is dictated up front, so the agent does not explore |
+| `structured_result` | The claim to verify. Never treated as evidence on its own |
+| `transcript_turns[{offset_seconds, speaker, text}]` | Question witness, answer witness, destination witness, and menu witness are all speaker-specific transcript spans |
+| `completion_confidence{score,label}` | Provider corroboration: low confidence can downgrade a verdict, high confidence can never override a missing witness |
+| `GET /v1/calls/{id}` | Polling and reconciliation; every response is recorded, masked, and replayable without a network |
+| `GET /v1/calls/{id}/events` | Recorded alongside each call for the audit trail |
+| `webhook_url` | Accepted on the request; terminal webhooks are unsigned, so Kol reconciles through `GET` before acting on one |
+
 ## Healthcare boundary
 
 Kol is an administrative RCM prototype. It does not provide medical advice, diagnose, triage,
@@ -143,11 +167,12 @@ schemas/          portable route interchange contract
 
 ## Current proof
 
-- 63 automated tests pass with zero root runtime dependencies.
+- 72 automated tests pass with zero root runtime dependencies, on every push in CI.
 - The 640-case synthetic adversarial matrix has zero unsafe auto-accepts.
 - CALL-E completed a guarded call to an allowlisted India destination with 14 transcript turns.
-- Prose-guided keypad replay against Kol's owned IVR fixture is still a live-proof requirement;
-  it is not silently represented as completed.
+- Prose-guided keypad replay is demonstrated live through the `/call` IVR route replay against
+  a human-read menu, with an operator-attested receipt; a fixture-logged or audio-decoded
+  receipt is still the stronger witness and is not represented as completed.
 - CALL-E contribution merged upstream on 11 Sep 2026 as `skills/kol-ivr-route` and
   `apps/typescript/kol`: https://github.com/CALLE-AI/awesome-phone-call-agents/pull/453
 
