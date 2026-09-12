@@ -2,6 +2,7 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import {
   buildPublicCallState,
   CLAIM_DEMO,
+  ROUTE_DEMO,
   type DemoScenario,
   type ProviderCall,
   type PublicCallState,
@@ -29,7 +30,11 @@ export function validateDestination(value: string) {
 }
 
 export async function createDemoCall(to: string, scenario: DemoScenario): Promise<ProviderCall> {
-  const request = scenario === 'claim_evidence' ? claimDemoRequest(to) : reachabilityRequest(to);
+  const request = scenario === 'claim_evidence'
+    ? claimDemoRequest(to)
+    : scenario === 'ivr_route'
+      ? ivrRouteRequest(to)
+      : reachabilityRequest(to);
   const hour = new Date().toISOString().slice(0, 13);
   const idempotencyKey = `kol-web-${createHash('sha256').update(`${JSON.stringify(request)}:${hour}`).digest('hex').slice(0, 32)}`;
   return calle('/v1/calls', { method: 'POST', body: JSON.stringify(request), headers: { 'Idempotency-Key': idempotencyKey } });
@@ -83,6 +88,56 @@ function claimDemoRequest(to: string) {
       },
     },
     metadata: { kol_scenario: 'fictional-claim-evidence-demo', purpose: 'no-phi-field-grounding-test' },
+  };
+}
+
+/**
+ * A replay: the route is dictated up front from the atlas, so the agent should not explore.
+ * The recipient reads a fictional two-level menu aloud and, after the second key, answers
+ * as a representative. The task asks for keypad tones, and for a report of every menu heard
+ * and every key pressed, which the gate later treats as the model's own testimony.
+ */
+function ivrRouteRequest(to: string) {
+  const [first, second] = ROUTE_DEMO.keys;
+  return {
+    task: [
+      `Place one authorised demonstration call to a participant who will act as the automated phone menu of ${ROUTE_DEMO.org}, using fictional data. No real medical data is involved.`,
+      'Begin by saying: Hello, this is Kol, an automated assistant running a fictional phone-menu demonstration.',
+      'The route is already known, so do not explore other options.',
+      `When the first menu is read out, press ${first} on the keypad by sending the DTMF tone. Do not say the number aloud.`,
+      `When the second menu is read out, press ${second} on the keypad by sending the DTMF tone. Do not say the number aloud.`,
+      `A representative then answers. Ask exactly: What is the current status of fictional claim ${CLAIM_DEMO.reference}?`,
+      'Do not suggest the answer. Listen, repeat it once for confirmation, thank them, and end the call.',
+      'Report every menu you heard, what it said, and precisely which key you pressed at each one.',
+      'Do not ask for a name, member ID, date of birth, health information, payment, or any other personal data.',
+    ].join(' '),
+    recipients: [{ phones: [to], region: to.startsWith('+91') ? 'IN' : 'US', locale: to.startsWith('+91') ? 'en-IN' : 'en-US' }],
+    result_schema: {
+      type: 'object',
+      required: ['reached_target', 'menu_levels', 'claim_reference', 'claim_status', 'paid_amount', 'payment_date', 'target_name_used'],
+      properties: {
+        reached_target: { type: 'string', enum: ['yes', 'no', 'unclear'] },
+        target_name_used: { type: 'string' },
+        menu_levels: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['level', 'prompt_heard', 'action_type'],
+            properties: {
+              level: { type: 'integer' },
+              prompt_heard: { type: 'string' },
+              action_type: { type: 'string', enum: ['dtmf', 'speech', 'wait', 'none'] },
+              action_value: { type: 'string', description: 'The key pressed, when action_type is dtmf.' },
+            },
+          },
+        },
+        claim_reference: { type: 'string' },
+        claim_status: { type: 'string', enum: ['paid', 'pending', 'denied', 'unknown'] },
+        paid_amount: { type: 'string' },
+        payment_date: { type: 'string' },
+      },
+    },
+    metadata: { kol_scenario: 'fictional-ivr-route-demo', purpose: 'no-phi-route-replay-test' },
   };
 }
 

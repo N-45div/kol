@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     if (!verifyPin(String(body.pin ?? ''))) return NextResponse.json({ error: 'Incorrect demo PIN.' }, { status: 401 });
     if (body.confirmed !== true) return NextResponse.json({ error: 'Exact call authorisation is required.' }, { status: 400 });
     const destination = validateDestination(String(body.phone ?? ''));
-    const scenario: DemoScenario = body.scenario === 'claim_evidence' ? 'claim_evidence' : 'reachability';
+    const scenario: DemoScenario = body.scenario === 'claim_evidence' || body.scenario === 'ivr_route' ? body.scenario : 'reachability';
     const call = await createDemoCall(destination, scenario);
     return NextResponse.json(publicCallState(call), { status: 202 });
   } catch (error) {
