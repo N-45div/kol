@@ -5,6 +5,7 @@ import type { DriftReport } from '../atlas/drift.ts';
 import { isReplayable, type NavigationReport, type Route } from '../atlas/types.ts';
 import { pollUntilTerminal } from '../calle/poll.ts';
 import { allTurns, type CallRecord, type CalleTransport, type CreateCallRequest } from '../calle/types.ts';
+import { assertNoPhi } from '../healthcare/phi.ts';
 import { maskE164 } from '../util/mask.ts';
 import { preflight, type Preflight } from './preflight.ts';
 import { verifyAnswer, type Verification } from './verify.ts';
@@ -63,6 +64,10 @@ export interface ChaseOptions {
 
 export async function runChase(request: ChaseRequest, opts: ChaseOptions): Promise<ChaseResult> {
   const { transport, atlas, now } = opts;
+
+  // Everything below is spoken aloud to whoever answers. Refuse before anything is compiled.
+  assertNoPhi({ question: request.question, reference: request.reference, target: request.targetName, org: request.org });
+
   await atlas.load();
 
   const known = atlas.get(request.lineE164, request.goal);
