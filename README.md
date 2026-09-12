@@ -48,6 +48,23 @@ The claim-result gate checks:
 Only a verified call may teach the Route Atlas. A contradiction quarantines the route so the
 next call explores instead of confidently repeating a stale path.
 
+## What a biller gets beyond one call, one claim
+
+- **Several claims on one call.** A biller reads six claim numbers off a list once they are
+  through the tree. Kol asks the representative to name each claim with its answer, and then
+  binds every answer to its claim in the payer's words. The failure only a batch can have is
+  the swapped answer: every number spoken, every quote real, claim A filed with claim B's
+  amount. The single-claim gate passes it; the batch gate contradicts it. A claim nobody asked
+  about is contradicted, an unanswered claim is held, a quote that names no claim goes to a
+  person.
+- **CALL-E's own evidence is cross-examined.** The provider attaches free-text justifications
+  to a result. They are the model explaining itself, so a justification that narrates an
+  amount or status the payer never said blocks auto-accept.
+- **A PHI guard that refuses to dial.** Everything in a chase request is spoken aloud to
+  whoever answers. A member ID, date of birth, diagnosis code, patient name, SSN, email or
+  phone number in the question stops the call before it is compiled, and the refusal masks
+  what it found. A claim number and a dollar amount pass.
+
 ## Route Atlas
 
 Each route is versioned by `(payer line, goal)` and stores menu levels, actions, timings,
@@ -73,17 +90,20 @@ npm test
 npm run eval
 ```
 
-`npm run demo` replays three fictional healthcare cases: a verified paid claim, a plausible
-answer from the wrong department, and a changed keypress trail. It never touches the network.
+`npm run demo` replays four fictional healthcare cases: a verified paid claim, a plausible
+answer from the wrong department, a changed keypress trail, and three claims on one call with
+one answer filed under the wrong claim. It never touches the network.
 
-The seeded evaluation covers 640 cases across eight families: clean paid, clean denied,
-fabricated amount, wrong department with matching numbers, question never asked, route
-mismatch, missing independent route receipt, and low provider confidence. Current result:
+The seeded evaluation has two matrices. Single claim per call: 720 cases across nine
+families (clean paid, clean denied, fabricated amount, wrong department with matching
+numbers, question never asked, route mismatch, missing independent route receipt, low
+provider confidence, provider evidence unsupported). Several claims per call: 1,280 claim
+verdicts across five families (clean, crossed answer, invented claim, unanswered claim,
+ambiguous quote). Current result:
 
 ```text
-safe results accepted 160/160
-unsafe results held   480/480
-unsafe auto-accepts   0
+single claim per call    safe accepted 160/160   unsafe held 560/560    unsafe auto-accepts 0
+several claims per call  safe accepted 960/960   unsafe held 320/320    unsafe auto-accepts 0
 ```
 
 These are synthetic evaluation results, not a measurement of CALL-E or payer-call accuracy.
@@ -167,8 +187,8 @@ schemas/          portable route interchange contract
 
 ## Current proof
 
-- 72 automated tests pass with zero root runtime dependencies, on every push in CI.
-- The 640-case synthetic adversarial matrix has zero unsafe auto-accepts.
+- 108 automated tests pass with zero root runtime dependencies, on every push in CI.
+- The 2,000 synthetic adversarial verdicts (720 single-claim, 1,280 multi-claim) have zero unsafe auto-accepts.
 - CALL-E completed a guarded call to an allowlisted India destination with 14 transcript turns.
 - Prose-guided keypad replay is demonstrated live through the `/call` IVR route replay against
   a human-read menu, with an operator-attested receipt; a fixture-logged or audio-decoded

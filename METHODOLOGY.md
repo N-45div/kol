@@ -8,8 +8,9 @@ Kol separates three evidence classes so a polished demo cannot turn an assumptio
   masked replay is committed under `artifacts/probe-p4-calle-hotline/`.
 - The Route Atlas, drift classifier, escalation ladder, DTMF decoder, healthcare witness gate,
   and replay transport execute locally under automated tests.
-- The deterministic healthcare matrix currently accepts 160 of 160 clean synthetic results and
-  withholds 480 of 480 unsafe or incomplete synthetic results.
+- The deterministic healthcare matrices currently accept 160 of 160 clean single-claim results
+  and 960 of 960 clean claims on multi-claim calls, and withhold 560 of 560 unsafe or
+  incomplete single-claim results and 320 of 320 unsafe multi-claim verdicts.
 
 ## Synthetic
 
@@ -30,6 +31,18 @@ The corpus contains 80 variations of each family:
 | Route mismatch | Withhold | Model-reported keys differ from external receipt |
 | Missing route receipt | Withhold | The model is the only route witness |
 | Low confidence | Withhold | Provider itself reports uncertainty |
+| Provider evidence unsupported | Withhold | CALL-E's own justification narrates an amount the payer never said |
+
+The multi-claim corpus has 80 calls in each of five families, three or four claims per call,
+every claim scored on its own:
+
+| Family | Expected disposition | Failure being tested |
+| --- | --- | --- |
+| Clean | Accept all | Each answer names its claim, every field grounded |
+| Crossed answer | Withhold one | Claim A filed with claim B's amount and B's sentence as proof |
+| Invented claim | Withhold one | A grounded quote presented as an answer about a claim nobody asked for |
+| Unanswered claim | Withhold one | A claim asked about and never answered |
+| Ambiguous quote | Withhold one | Real payer speech that names no claim, on a call with three |
 
 `npm run eval` regenerates the matrix; there is no stored score file to edit.
 
