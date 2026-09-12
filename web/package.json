@@ -10,17 +10,21 @@
     "build": "next build",
     "start": "next start",
     "lint": "oxlint app",
-    "format": "oxfmt"
+    "format": "oxfmt",
+    "e2e:chase": "node scripts/drive-chase.mjs",
+    "e2e:crash": "node scripts/kill-and-resume.mjs",
+    "fake:calle": "node scripts/fake-calle.mjs"
   },
   "dependencies": {
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "next": "16.3.4",
     "@base-ui/react": "1.7.0",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "lucide-react": "1.31.0",
-    "tailwind-merge": "3.6.0"
+    "next": "16.3.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "tailwind-merge": "3.6.0",
+    "workflow": "^4.8.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.2.1",

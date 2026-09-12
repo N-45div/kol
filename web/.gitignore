@@ -37,3 +37,7 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+
+# workflow local world
+/.workflow-data/
+/.swc

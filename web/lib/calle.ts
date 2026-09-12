@@ -8,7 +8,8 @@ import {
   type PublicCallState,
 } from './live-evidence';
 
-const API_ORIGIN = 'https://api.heycall-e.com';
+/** Overridable so the durable chase can be exercised end to end against a local stand-in. */
+const API_ORIGIN = process.env.KOL_CALLE_ORIGIN ?? 'https://api.heycall-e.com';
 
 export function callingEnabled() {
   return process.env.KOL_CALLING_ENABLED === 'true' && Boolean(process.env.CALLE_API_KEY && process.env.KOL_DEMO_PIN);
@@ -29,15 +30,15 @@ export function validateDestination(value: string) {
   return normalised;
 }
 
-export async function createDemoCall(to: string, scenario: DemoScenario): Promise<ProviderCall> {
+export async function createDemoCall(to: string, scenario: DemoScenario, idempotencyKey?: string): Promise<ProviderCall> {
   const request = scenario === 'claim_evidence'
     ? claimDemoRequest(to)
     : scenario === 'ivr_route'
       ? ivrRouteRequest(to)
       : reachabilityRequest(to);
   const hour = new Date().toISOString().slice(0, 13);
-  const idempotencyKey = `kol-web-${createHash('sha256').update(`${JSON.stringify(request)}:${hour}`).digest('hex').slice(0, 32)}`;
-  return calle('/v1/calls', { method: 'POST', body: JSON.stringify(request), headers: { 'Idempotency-Key': idempotencyKey } });
+  const key = idempotencyKey ?? `kol-web-${createHash('sha256').update(`${JSON.stringify(request)}:${hour}`).digest('hex').slice(0, 32)}`;
+  return calle('/v1/calls', { method: 'POST', body: JSON.stringify(request), headers: { 'Idempotency-Key': key } });
 }
 
 function reachabilityRequest(to: string) {
