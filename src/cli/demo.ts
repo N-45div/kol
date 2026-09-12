@@ -1,3 +1,5 @@
+import { verifyClaimBatch } from '../healthcare/batch.ts';
+import { makeBatchFixture } from '../healthcare/batch-fixtures.ts';
 import { makeClaimFixture, type FixtureKind } from '../healthcare/fixtures.ts';
 import { verifyClaimOutcome } from '../healthcare/verify.ts';
 
@@ -24,5 +26,14 @@ for (const [index, scene] of scenes.entries()) {
   console.log(`   ${verification.summary}`);
 }
 
+const batch = verifyClaimBatch(makeBatchFixture('batch_crossed', 11).input);
 console.log('');
-console.log('Next: npm run eval for the complete 640-case adversarial matrix.');
+console.log('4. Three claims on one call, one answer filed under the wrong claim');
+console.log(`   ${batch.summary}`);
+for (const entry of batch.claims) {
+  const binding = entry.bindingChecks.find((check) => check.name === 'answer bound to this claim');
+  console.log(`   claim ${entry.claimReference}: ${entry.verification.verdict.toUpperCase()}${binding && !binding.passed ? ` — ${binding.detail}` : ''}`);
+}
+
+console.log('');
+console.log('Next: npm run eval for the complete adversarial matrices.');
