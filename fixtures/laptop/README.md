@@ -63,10 +63,11 @@ Then, per call — start this first, it waits for you:
 powershell -ExecutionPolicy Bypass -File fixtures\laptop\run-fixture.ps1
 ```
 
-In another terminal, with `KOL_SELF_LINE` set in `.env`:
+In another terminal, with `KOL_SELF_LINE` set in `.env`. `--via self` dials that number instead
+of the DID fixture, and picks the region and locale from its country code:
 
 ```bash
-KOL_MODE=live node --env-file=.env probes/run.ts p3 --confirm
+KOL_MODE=live node --env-file=.env probes/run.ts p3 --via self --confirm
 ```
 
 Answer the call, switch to speakerphone, put the phone next to the laptop, press Enter in the
