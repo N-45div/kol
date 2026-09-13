@@ -52,30 +52,47 @@ export default function CallTestPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // Follow the durable run: first to learn which call it created, then to collect its verdict.
+  const runId = run?.runId ?? null;
+  const runKey = run?.runKey ?? null;
+  const runDone = !run || run.runStatus === 'completed' || run.runStatus === 'failed' || run.runStatus === 'cancelled';
+  const callId = run?.callId ?? null;
+  const runHasOutput = Boolean(run?.output);
+
   useEffect(() => {
-    if (!run || run.runStatus === 'completed' || run.runStatus === 'failed' || run.runStatus === 'cancelled') return;
-    const timer = window.setInterval(async () => {
-      const response = await fetch(`/api/calls?run=${encodeURIComponent(run.runId)}&key=${encodeURIComponent(run.runKey)}`, { headers: { 'x-kol-demo-pin': pin } });
+    if (!runId || !runKey || runDone) return;
+    let cancelled = false;
+    const tick = async () => {
+      const response = await fetch(`/api/calls?run=${encodeURIComponent(runId)}&key=${encodeURIComponent(runKey)}`, { headers: { 'x-kol-demo-pin': pin } });
       const data = await response.json();
+      if (cancelled) return;
       if (!response.ok) { setError(data.error ?? 'Could not follow the run.'); return; }
       setRun(data);
       if (data.output) setCall(data.output);
-    }, 5000);
-    return () => window.clearInterval(timer);
-  }, [run, pin]);
+    };
+    void tick();
+    const timer = window.setInterval(tick, 5000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+    // Depend on the run's identity and status only: a fresh run object every poll must not
+    // restart the interval, or the sibling call poll below never gets to fire.
+  }, [runId, runKey, runDone, pin]);
 
   // Follow the call itself for the live transcript while the run is still working.
+  const callSettled = Boolean(call?.terminal) && call?.scenario !== 'ivr_route';
+
   useEffect(() => {
-    if (!run?.callId || run.output) return;
-    if (call?.terminal && call.scenario !== 'ivr_route') return;
-    const timer = window.setInterval(async () => {
-      const response = await fetch(`/api/calls?id=${encodeURIComponent(run.callId!)}`, { headers: { 'x-kol-demo-pin': pin } });
+    if (!callId || runHasOutput || callSettled) return;
+    let cancelled = false;
+    const tick = async () => {
+      const response = await fetch(`/api/calls?id=${encodeURIComponent(callId)}`, { headers: { 'x-kol-demo-pin': pin } });
       const data = await response.json();
+      if (cancelled) return;
       if (response.ok) setCall((current) => (current?.routeReceipt ? current : data));
       else setError(data.error ?? 'Could not poll the call.');
-    }, 6000);
-    return () => window.clearInterval(timer);
-  }, [run, call, pin]);
+    };
+    void tick();
+    const timer = window.setInterval(tick, 6000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [callId, runHasOutput, callSettled, pin]);
 
   useEffect(() => {
     if (call?.terminal) window.sessionStorage.setItem('kol-live-receipt', JSON.stringify(call));
@@ -125,7 +142,7 @@ export default function CallTestPage() {
           <h1 className="mt-2 text-4xl font-semibold tracking-[-.05em]">From real call to auditable verdict.</h1>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-[#627570]">CALL-E places the call and returns a transcript plus structured result. Kol independently grounds each claim in recipient-side words and refuses to invent a missing route witness.</p>
 
-          {!call ? (
+          {!run && !call ? (
             <form onSubmit={submit} className="mt-9 space-y-6">
               <fieldset>
                 <legend className="text-sm font-semibold">Choose a safe demonstration</legend>
@@ -148,7 +165,7 @@ export default function CallTestPage() {
               {error && <ErrorMessage message={error} />}
               <button disabled={!confirmed || submitting} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#153f37] px-5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"><PhoneCall className="size-4" />{submitting ? 'Submitting once…' : 'Place one test call'}</button>
             </form>
-          ) : run && !call ? <RunPending run={run} error={error} /> : <CallReceipt call={call!} run={run} error={error} exportReceipt={exportReceipt} reset={() => { setCall(null); setRun(null); setConfirmed(false); setError(''); }} attachReceipt={async (keys) => {
+          ) : !call ? <RunPending run={run!} error={error} /> : <CallReceipt call={call} run={run} error={error} exportReceipt={exportReceipt} reset={() => { setCall(null); setRun(null); setConfirmed(false); setError(''); }} attachReceipt={async (keys) => {
             const response = await fetch('/api/calls/receipt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ runKey: run?.runKey, pin, heardKeys: keys }) });
             const data = await response.json();
             if (!response.ok) setError(data.error ?? 'The run did not accept the receipt.');
