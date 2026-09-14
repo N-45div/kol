@@ -185,6 +185,8 @@ security, privacy, vendor, and BAA assessment.
 
 ## Project map
 
+The diagrams in [ARCHITECTURE.md](ARCHITECTURE.md) follow a chase through these modules end to end.
+
 ```text
 src/atlas/        versioned IVR routes, fingerprints, drift, repair
 src/calle/        CALL-E API transport, polling, masking, replay
