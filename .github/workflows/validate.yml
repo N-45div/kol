@@ -18,5 +18,6 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run eval
-      - run: npm --prefix web ci
+      # web/ has no committed lockfile, so npm ci cannot run there.
+      - run: npm --prefix web install --no-audit --no-fund
       - run: npm run web:build
