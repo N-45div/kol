@@ -12,6 +12,12 @@ Kol separates three evidence classes so a polished demo cannot turn an assumptio
   and 960 of 960 clean claims on multi-claim calls, and withhold 560 of 560 unsafe or
   incomplete single-claim results and 320 of 320 unsafe multi-claim verdicts.
 
+- A real claim-status role-play call on 14 Sep 2026 completed with 14 turns and CALL-E confidence
+  0.90. Its structured result matched the payer's words, and Kol still returned `contradicted`:
+  the transcript rendered claim 4471 as "104471" and the extraction left the department empty.
+- In three live calls where a person read a two-level menu aloud, CALL-E's agent spoke over the
+  menu and pressed no keys. Live keypad replay is not observed.
+
 ## Synthetic
 
 The IVR organization, claim references, amounts, representatives, passphrases, phone numbers,

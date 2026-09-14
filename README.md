@@ -199,9 +199,14 @@ schemas/          portable route interchange contract
 
 ## Current proof
 
-- 108 automated tests pass with zero root runtime dependencies, on every push in CI.
+- 114 automated tests pass with zero root runtime dependencies, on every push in CI.
 - The 2,000 synthetic adversarial verdicts (720 single-claim, 1,280 multi-claim) have zero unsafe auto-accepts.
 - CALL-E completed a guarded call to an allowlisted India destination with 14 transcript turns.
+- On 14 Sep 2026 a real claim-status role-play call completed through the live lab: 14 turns,
+  CALL-E confidence 0.90, and a structured result matching what the payer said (claim 4471,
+  paid, $1,240, August 12, 2026). Kol still held it **contradicted**: the transcript heard the
+  claim number as "104471" and the extraction never named the department. A correct answer
+  without its evidence is not written.
 - Prose-guided keypad replay against a live voice did **not** work. In three calls on
   14 Sep 2026 where a person read the two-level menu aloud, CALL-E's agent spoke over the menu
   and pressed no keys, including after it was told explicitly to stay silent and use only the
