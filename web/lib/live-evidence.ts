@@ -296,26 +296,37 @@ function supportsQuestion(value: string) {
 
 function supportsDepartment(value: string) {
   const text = normalise(value);
-  return text.includes('claims') && text.includes('status') && text.includes('department');
+  // A phone line transcribes "claims" as "claim" or "claim's" as often as not.
+  return /\bclaims?\b/.test(text) && text.includes('status') && text.includes('department');
 }
 
 function supportsReference(value: string) {
   const text = normalise(value);
-  return /\b4471\b/.test(text) || /\b4\s+4\s+7\s+1\b/.test(text) || text.includes('four four seven one');
+  return /\b4471\b/.test(text)
+    || /\b4\s+4\s+7\s+1\b/.test(text)
+    || /\b44\s+71\b/.test(text)
+    || /\bfour\s+four\s+seven\s+one\b/.test(text)
+    || /\bforty\s+four\s+seventy\s+one\b/.test(text)
+    || /\bfour\s+thousand\s+four\s+hundred\s+(?:and\s+)?seventy\s+one\b/.test(text);
 }
 
 function supportsAmount(value: string) {
   const text = normalise(value);
   const numericMatch = [...value.matchAll(/(?:\$\s*)?\d[\d,]*(?:\.\d+)?/g)]
     .some((match) => canonicalAmount(match[0]) === '1240');
-  return numericMatch || text.includes('one thousand two hundred forty');
+  return numericMatch
+    || /\bone\s+thousand\s+two\s+hundred\s+(?:and\s+)?forty\b/.test(text)
+    || /\btwelve\s+hundred\s+(?:and\s+)?forty\b/.test(text);
 }
 
 function supportsDate(value: string) {
   const text = normalise(value);
   if (/\b2026[\s-]+0?8[\s-]+12\b/.test(value.toLowerCase())) return true;
-  const hasMonthDay = text.includes('august 12') || text.includes('august twelfth');
-  const hasYear = text.includes('2026') || text.includes('twenty twenty six') || text.includes('two thousand twenty six');
+  // Month first or day first: "August 12th", "12 August", "the twelfth of August".
+  const hasMonthDay = /\baugust\s+(?:the\s+)?(?:12(?:th)?|twelfth)\b/.test(text)
+    || /\b(?:12(?:th)?|twelfth)\s+(?:of\s+)?august\b/.test(text);
+  const hasYear = /\b2026\b/.test(text) || /\btwenty\s+twenty\s+six\b/.test(text)
+    || /\btwo\s+thousand\s+(?:and\s+)?twenty\s+six\b/.test(text);
   return hasMonthDay && hasYear;
 }
 
