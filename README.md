@@ -121,6 +121,8 @@ Live Vercel demo: **https://kol-verified-payer-calls.vercel.app**
   reads a two-level phone menu aloud, CALL-E replays the atlas route by keypad, and the
   operator then enters the tones they heard as a receipt independent of the model. Each mode
   displays the real transcript, structured extraction, deterministic checks, and verdict.
+  Against a menu read by a person, CALL-E's agent talked over it and pressed no keys in all
+  three live attempts, so that mode is shown against a stand-in CALL-E.
 
 ```bash
 npm run web:dev
@@ -200,9 +202,11 @@ schemas/          portable route interchange contract
 - 108 automated tests pass with zero root runtime dependencies, on every push in CI.
 - The 2,000 synthetic adversarial verdicts (720 single-claim, 1,280 multi-claim) have zero unsafe auto-accepts.
 - CALL-E completed a guarded call to an allowlisted India destination with 14 transcript turns.
-- Prose-guided keypad replay is demonstrated live through the `/call` IVR route replay against
-  a human-read menu, with an operator-attested receipt; a fixture-logged or audio-decoded
-  receipt is still the stronger witness and is not represented as completed.
+- Prose-guided keypad replay against a live voice did **not** work. In three calls on
+  14 Sep 2026 where a person read the two-level menu aloud, CALL-E's agent spoke over the menu
+  and pressed no keys, including after it was told explicitly to stay silent and use only the
+  keypad. The IVR route replay is proven end to end against a stand-in CALL-E; a live keypad
+  replay against a real automated IVR remains a requirement and is not represented as done.
 - CALL-E contribution merged upstream on 11 Sep 2026 as `skills/kol-ivr-route` and
   `apps/typescript/kol`: https://github.com/CALLE-AI/awesome-phone-call-agents/pull/453
 
