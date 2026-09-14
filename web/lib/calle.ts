@@ -102,13 +102,18 @@ function ivrRouteRequest(to: string) {
   const [first, second] = ROUTE_DEMO.keys;
   return {
     task: [
-      `Place one authorised demonstration call to a participant who will act as the automated phone menu of ${ROUTE_DEMO.org}, using fictional data. No real medical data is involved.`,
-      'Begin by saying: Hello, this is Kol, an automated assistant running a fictional phone-menu demonstration.',
-      'The route is already known, so do not explore other options.',
-      `When the first menu is read out, press ${first} on the keypad by sending the DTMF tone. Do not say the number aloud.`,
-      `When the second menu is read out, press ${second} on the keypad by sending the DTMF tone. Do not say the number aloud.`,
-      `A representative then answers. Ask exactly: What is the current status of fictional claim ${CLAIM_DEMO.reference}?`,
+      `Place one authorised demonstration call. The line answers with the automated phone menu of ${ROUTE_DEMO.org}, read aloud by a participant using fictional data. No real medical data is involved.`,
+      // A phone menu talks first and does not take turns. An agent that greets it, thanks it,
+      // or answers it at a sentence boundary talks over the options it needs to hear.
+      'When the call connects, do not speak. Listen silently. The menu is read sentence by sentence with pauses; a pause does not mean it has finished, and it is never your turn to talk while a menu is playing.',
+      'Never reply to the menu, never thank it, and never make up menu prompts of your own.',
+      'The route is already known, so do not explore other options. Your only actions on the menus are keypad presses.',
+      `When you have heard the option for claims, press ${first} on the keypad by sending the DTMF tone. Do not say the number aloud.`,
+      `Then listen silently to the next menu. When you have heard the option for the status of an existing claim, press ${second} on the keypad by sending the DTMF tone. Do not say the number aloud.`,
+      'After the second key, a person answers. Only then speak: say that you are Kol, an automated assistant calling about a fictional claim.',
+      `Then ask exactly: What is the current status of fictional claim ${CLAIM_DEMO.reference}?`,
       'Do not suggest the answer. Listen, repeat it once for confirmation, thank them, and end the call.',
+      'Do not hang up while a menu is being read or during a pause. Only if there has been complete silence for 20 seconds, say once that you are Kol, an automated assistant, and keep listening.',
       'Report every menu you heard, what it said, and precisely which key you pressed at each one.',
       'Do not ask for a name, member ID, date of birth, health information, payment, or any other personal data.',
     ].join(' '),
